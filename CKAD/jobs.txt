@@ -1,0 +1,41 @@
+kind: Pod
+spec:
+    restartPolicy: Never #Default is Always
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: math-add-job
+spec:
+    backoffLimit: 6 # number of retries. Default is 6
+    activeDeadlineSeconds: 3600 # max up time is 1 hr
+    completions: 3 # pods will be created until there are 3 success jobs
+    parallelism: 3 # create 3 pods at once
+    template:
+        spec:
+            containers:
+                - name: math-add
+                  image: ubuntu
+                  command: ['expr','3','+','2']
+            restartPolicy: Never
+---
+kubectl get jobs
+kubectl delete job math-add-job
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+    name: reporting-cron-job
+spec:
+    schedule: "*/1 * * * *"
+    jobTemplate:
+        spec:
+            completions: 3 # pods will be created until there are 3 success jobs
+            parallelism: 3 # create 3 pods at once
+            template:
+                spec:
+                    containers:
+                        - name: reporting-tool
+                          image: reporting-tool
+                    restartPolicy: Never

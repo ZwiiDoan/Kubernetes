@@ -1,0 +1,47 @@
+--- Pod Status
+Pending -> ContainerCreating -> Running
+
+--- Pod Conditions
+PodScheduled -> Initialized -> ContainersReady -> Ready
+
+--- Readiness Probes
+kind: Pod
+spec:
+    containers:
+        readinessProbe:
+            httpGet:
+                path: /api/ready
+                port: 8080
+
+            tcpSocket:
+                port: 3306
+
+            exec:
+                command:
+                - cat 
+                - /app/is_ready
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failtureThreshold: 8 # default is 3
+
+--- Liveness Probes
+kubectl get pods #show RESTARTS COUNT
+
+kind: Pod
+spec:
+    containers:
+        livenessProbes:
+            httpGet:
+                path: /api/healthy
+                port: 8080
+
+            tcpSocket:
+                port: 3306
+
+            exec:
+                command:
+                    - cat
+                    - /app/is_healthy
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 8

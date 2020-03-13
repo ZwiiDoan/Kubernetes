@@ -1,0 +1,16 @@
+--- To tell nodes to accept only a certain types of pods
+kubectl taint nodes node-name key=value:taint-effect
+    (taint-effect: NoSchedule, PreferNoSchedule, NoExecute)
+
+kubectl taint nodes node1 app=blue:NoSchedule
+---
+kind:Pod
+spec:
+    tolerations:
+        - key: "app"
+          operator: "Equal"
+          value: "blue"
+          effect: "NoSchedule"
+
+---Remove Taint command
+kubectl taint nodes node-name key=value:taint-effect-

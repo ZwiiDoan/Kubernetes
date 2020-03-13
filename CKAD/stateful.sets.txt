@@ -1,0 +1,70 @@
+# StatefulSet is similar to Deployment but has extra features:
+1. Pods are deployed in sequence
+2. Assign ordinal index to each pod starting from 0 (mysql-0,mysql-1,mysql-2, ...)
+3. Maintain identities for pods even when they got restarted (sticky identity)
+4. StatefulSets do not provide any guarantees on the termination of pods when a StatefulSet is deleted. 
+To achieve ordered and graceful termination of the pods in the StatefulSet, 
+it is possible to scale the StatefulSet down to 0 prior to deletion.
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql
+        volumeMounts:
+        - mountPathL /var/lib/mysql
+          name: data-volume
+# By default all pods of StatefulSet try to use the same PVC -> same PV (Not all providers support this)
+#      volumes:
+#      - name: data-volume
+#        persistentVolumeClaim:
+#          claimName: data-volume
+# use volumeClaimTemplates to have dedicated PVC for each pod in StatefulSet
+# StatefulSet will ensure pod is connected to the same PVC after being restarted
+  volumeClaimTemplates: 
+  - metadata:
+      name: data-volume
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: google-storage-silver
+      resources:
+        requests:
+          storage: 500Mi
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mysql
+  serviceName: mysql-h # headless service name
+  podManagementPolicy: Parallel # default is OrderedReady 
+  # which allows deployment, scaling, deleting to be done in sequence with unique identities for pods
+
+# Headless Service
+1. Does not do load balancing
+2. Does not have an IP
+3. Create DNS entry for each pod using: podname.headless-service-name.namespace.svc.cluster-domain
+i.e: mysql-0.mysql-h.default.svc.cluster.local
+mysql-1.mysql-h.default.svc.cluster.local
+mysql-2.mysql-h.default.svc.cluster.local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-h
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None # This will make a headless service
+

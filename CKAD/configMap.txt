@@ -1,0 +1,51 @@
+kubectl create configmap \
+    app-config --from-literal=APP_COLOR=blue \
+        --from-literal=APP_MODE=prod
+
+kubectl create configmap \
+    app-config --from-file=app_config.properties
+
+kubectl create -f config-map.yaml
+
+--- config-map.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: app-config
+data:
+    APP_COLOR: blue
+    APP_MODE: prod
+
+---
+
+kubectl get configmaps
+kubectl describe configmaps
+
+--- in pod-definition.yaml:
+...
+spec:
+    containers:
+        ...
+        envFrom:
+            - configMapRef:
+                name: app-config
+
+
+...
+spec:
+    containers:
+        ...
+        envFrom:
+            - configMapRef:
+                name: app-config
+                key: APP_COLOR
+
+...
+spec:
+    containers:
+        ...
+        volumes:
+            - name: app-config-volume
+              configMap:
+                name: app-config

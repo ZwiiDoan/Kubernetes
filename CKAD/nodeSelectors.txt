@@ -1,0 +1,22 @@
+kind: Pod
+spec:
+  nodeSelector:
+    size: Large # labels assigned to node
+---
+kubectl label nodes <node-name> <label-key>=<label-value>
+kubectl label nodes node=1 size=Large
+---
+kind: Pod
+spec: 
+  affinity:
+    nodeAffinity:
+      requireDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: size
+                operator: In # NotIn, Exists
+                values:
+                  - Large
+                  - Medium
+      # PreferredDuringSchedulingIgnoredDuringExecution
+      # requireDuringSchedulingRequiredDuringExecution

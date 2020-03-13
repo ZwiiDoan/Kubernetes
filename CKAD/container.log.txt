@@ -1,0 +1,2 @@
+kubectl logs -f <pod-name>
+kubectl logs -f <pod-name> <container-name>

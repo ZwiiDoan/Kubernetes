@@ -1,0 +1,16 @@
+metadata:
+    name:
+    labels:
+      app: App1
+
+---
+kubectl get pods --selector app=App1
+
+---
+kind: ReplicaSet
+spec:
+    selector:
+        matchLabels:
+            app: App1
+    annotations:
+        buildversion: 1.34

@@ -1,0 +1,22 @@
+container settings > pod settings
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+spec: 
+  securityContext:
+    runAsUser: 1000
+    capabilities:
+      add: ["MAC_ADMIN"]
+  containers:
+      - name: ubuntu
+        image: ubuntu
+        command: ["sleep", "3600"]
+        securityContext:
+          runAsUser: 1000
+          capabilities:
+            add: ["MAC_ADMIN"]
+---
+kubectl exec ubuntu-sleeper whoami
+kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...] [options]

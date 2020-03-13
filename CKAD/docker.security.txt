@@ -1,0 +1,3 @@
+docker run --user=1001 --add-cap MAC_ADMIN ubuntu
+docker run --remove-cap MAC_ADMIN ubuntu
+

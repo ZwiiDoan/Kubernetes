@@ -1,0 +1,12 @@
+kind: Pod
+spec:
+  containers:
+    - name: 
+      image:
+    - name:
+      image:
+---
+# Design patterns 
+# - Sidecar: LogAgent
+# - Adapter: Log Pre-Processing
+# - Ambassador: Log proxy/environment-dependent ingestor

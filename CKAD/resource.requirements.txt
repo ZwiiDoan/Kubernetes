@@ -1,0 +1,20 @@
+---default
+CPU - MEM - Disk
+0.5-256Mi-
+---
+spec:
+    containers:
+        resources:
+            requests:
+                memory: "1Gi"
+                cpu: 1
+            limits:
+                memory: "2Gi"
+                cpu: 2
+---
+cpu: 0.1 = 100m
+cpu: 1 = 1 AWS vCPU = 1GCP Core = 1 Azure Core = 1 Hyperthread
+1Mi = 1024 bytes
+1M = 1000 bytes
+---
+when pod exceeds memory limit => terminated
