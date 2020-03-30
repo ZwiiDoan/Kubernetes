@@ -1,6 +1,36 @@
-kubectl run --generator=run-pod/v1 nginx-pod --image=nginx:alpine
+# Pod
+kubectl run --generator=run-pod/v1 nginx-pod --image=nginx:alpine --dry-run -o yaml > nginx-pod.yaml
 kubectl run --generator=run-pod/v1 redis --image=redis:alpine -l tier=db
-kubectl expose pod redis --port=6379 --name redis-service
-kubectl create deployment webapp --image=kodekloud/webapp-color
+
+# Namespace
+kubectl create namespace my-namespace
+
+# ConfigMap
+kubectl create configmap app-config --from-literal=APP_COLOR=blue --from-literal=APP_MODE=prod
+
+# Deployment 
+kubectl create deployment webapp --image=kodekloud/webapp-color -o yaml > webapp-color-dep.yaml
 kubectl scale deployment webapp --replicas=3
+kubectl set image deployment nginx-deploy nginx=nginx:1.17
+kubectl rollout history deployment nginx-deploy
+kubectl rollout undo deployment nginx-deploy
+kubectl rollout status deployment nginx-deploy
+
+# Service
 kubectl expose deployment webapp --name=webapp-service --nodePort=30082 -- port=8080 --target-port=8080
+kubectl expose pod redis --port=6379 --name redis-service
+
+# Use netcat to check connectivity
+kubectl exec -it webapp-color -- sh
+nc -z -v secure-service 80
+#See history
+nc -z -v -w 1 secure-service 80
+
+# NetworkPolicy
+kubectl get netpol
+
+#Container command:
+command: ["/bin/sh", "-c", "echo 'Hello World!' >> some-path.log"]
+
+% Node
+kubectl label nodes master app=redis
