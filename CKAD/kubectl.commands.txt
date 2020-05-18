@@ -17,7 +17,7 @@ kubectl rollout undo deployment nginx-deploy
 kubectl rollout status deployment nginx-deploy
 
 # Service
-kubectl expose deployment webapp --name=webapp-service --nodePort=30082 -- port=8080 --target-port=8080
+kubectl expose deployment my-webapp --name=front-end-service -- port=80 --target-port=80
 kubectl expose pod redis --port=6379 --name redis-service
 
 # Use netcat to check connectivity
