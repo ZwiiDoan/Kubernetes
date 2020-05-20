@@ -1,0 +1,137 @@
+kubectl taint nodes node01 app_type=alpha:NoSchedule
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpha
+spec:
+  containers:
+  - name: redis
+    image: redis
+    imagePullPolicy: IfNotPresent
+  tolerations:
+  - key: "app_type"
+    operator: "Equal"
+    value: "alpha"
+    effect: "NoSchedule"
+
+
+kubectl label nodes node02 app_type=beta
+
+metadata:
+  name: nginx
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disktype
+            operator: In
+            values:
+            - ssd            
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: my-video-service
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: ckad-mock-exam-solution.com
+    http:
+      paths:
+      - path: /video
+        backend:
+          serviceName: my-video-service
+          servicePort: 8080
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx1401
+  labels:
+    app: nginx1401
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    livenessProbe:
+      exec:
+        command:
+        - ls /var/www/html/probe
+      initialDelaySeconds: 10
+      periodSeconds: 60
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: whalesay
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: docker/whalesay
+        command: ["cowsay"]
+        args: ["I am going to ace CKAD!"]
+      restartPolicy: Never
+  completions: 10
+  backoffLimit: 6
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-pod
+spec:
+  containers:
+  - name: jupiter
+    image: nginx
+    env:
+    - name: type
+      value: planet
+
+  - name: europa
+    image: busybox
+    command: ["sleep", "4800"]
+    env:
+    - name: type
+      value: moon
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-pd
+      name: test-volume
+  volumes:  
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /data
+      # this field is optional
+      type: Directory
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: custom-volume
+spec:
+  capacity:
+    storage: 50MiB
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hotsPath:
+    path: /opt/data
