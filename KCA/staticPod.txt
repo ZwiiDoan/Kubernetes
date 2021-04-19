@@ -1,0 +1,27 @@
+---
+- Kubelet can manage pod independently
+- Kubelet can read Pod manifests from a configured directory 
+and create/manage pods lifecycle according to those manifests
+- Those pods are static pods.
+---
+Configure static pods path when running kubelet.service
+ExecStart=...
+  --pod-manifest-path=/etc/Kubernetes/manifests \\
+...
+
+ExecStart=...
+  --config=kubeconfig.yaml \\
+...
+in kubeconfig.yaml
+staticPodPath: /etc/Kubernetes/manifests
+---
+When working with kube-apiserver, kubelet creates a read-only 
+mirror object in kube-apiserver for every static pod.
+---
+Use case: deploy all control plane components as static pods
+---
+ssh node01 #switch to another node
+logout #go back to master
+---
+ps -ef | grep kubelet | grep config #find kubelet config file location
+grep -i static /path/to/kubelet/config/file #find static pods directory

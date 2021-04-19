@@ -1,0 +1,41 @@
+--
+Kube cluster can have multiple schedulers
+/etc/kubernetes/manifests/kube-scheduler.yaml
+--
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-customer-scheduler
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - kube-scheduler
+    - --address=127.0.0.1
+    - --kubeconfig=/etc/kubernetes/scheduler.conf
+    - --leader-elect=false <= use with single master node
+    - --scheduler-name=my-custom-scheduler
+    - --lock-object-name=my-custom-scheduler <= use with multiple master nodes
+    image: k8s.gcr.io/kube-scheduler-amd64:v1.11.3
+    name: kube-scheduler
+
+--
+Configure a pod to use the custom scheduler
+pod-definition.yaml
+--
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+  schedulerName: my-custom-scheduler
+
+--
+Check for schedule events and logs
+--
+kubeclt get events | grep my-scheduler
+kubectl logs my-custom-scheduler --name-space=kube-system
+

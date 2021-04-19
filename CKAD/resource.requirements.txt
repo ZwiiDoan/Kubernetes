@@ -14,7 +14,37 @@ spec:
 ---
 cpu: 0.1 = 100m
 cpu: 1 = 1 AWS vCPU = 1GCP Core = 1 Azure Core = 1 Hyperthread
-1Mi = 1024 bytes
-1M = 1000 bytes
+1Ki = 1024 bytes
+1K = 1000 bytes
 ---
 when pod exceeds memory limit => terminated
+--- Pods take default resource configs from LimitRange in the namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-limit-range
+spec:
+  limits:
+  - default:
+      memory: 512Mi
+    defaultRequest:
+      memory: 256Mi
+    type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-limit-range
+spec:
+  limits:
+  - default:
+      cpu: 1
+    defaultRequest:
+      cpu: 0.5
+    type: Container
+---
+If you specify a Container's limit, but not its request, 
+the request will automatically be set to match the limit
+---
+If you specify a Container's request, but not its limit,
+the limit will automatically be set to default limit

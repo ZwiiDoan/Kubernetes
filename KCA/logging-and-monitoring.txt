@@ -1,0 +1,15 @@
+-- Metrics Server
+Only in-memory Solution
+minikube addons enable metrics-server
+
+-- Kubelet contains cAdvisor 
+which is an agent that retrieves perf metrics from pods and 
+send them to Metrics Server
+
+-- view performance metrics
+kubectl top node
+kubectl top pod
+
+-- application logs
+docker logs -f container-name
+kubectl logs -f pod-name -c container-name

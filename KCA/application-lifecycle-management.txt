@@ -1,0 +1,17 @@
+alias k=kubectl
+
+-- Create a deployment
+-- Default deployment strategy: Rolling update
+k create -f deployment-definition.yaml
+
+-- Check deployment/rollout status
+k get deployments 
+k rollout status deployment/deployment-name
+k rollout history deployment/deployment-name
+
+-- Update a deployment
+k apply -f deployment-definition.yaml
+k set image deployment/deployment-name nginx=nginx:1.9.1
+
+-- Rollback a deployment
+k rollout undo deployment/deployment-name

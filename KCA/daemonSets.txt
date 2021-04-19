@@ -1,0 +1,23 @@
+---
+DaemonSet ensures exactly one copy of a pod is present on a node
+Use case: Logs Collector, Monitoring Solution, kube-proxy, network agent
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: monitoring-daemon
+spec:
+  selector:
+    matchLabels:
+      app: monitoring-agent
+    template:
+      metadata:
+        labels:
+          app: monitoring-agent
+      spec:
+        containers:
+        - name: monitoring-agent
+          image: monitoring-agent
+---
+kubectl get daemonsets
+---

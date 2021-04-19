@@ -1,0 +1,27 @@
+-- docker command
+docker run <image-name> <commands>
+docker run ubuntu sleep 5
+
+--ubuntu dockerfile
+FROM Ubuntu
+CMD ["sleep", "5"] <== first command is an executable process
+
+--ubuntu-sleeper dockerfile
+FROM Ubuntu
+ENTRYPOINT ["sleep"] <== executable process on container start-up
+CMD ["5] <== 5 will be appended to sleep by default
+
+docker-run ubuntu-sleeper <== Sleep 5 seconds
+docker-run ubuntu-sleeper 10 <== Sleep 10 seconds
+
+--ubuntu-sleeper-pod
+apiVersion: v1
+kind: Pod
+metadata:
+    name: ubuntu-sleeper-pod
+spec:
+    containers:
+    - name: ubuntu-sleeper
+      image: ubuntu-sleeper
+      args: ["10"] <== overwrite dockerfile CMD
+      command: ["sleep"] <== overwrite dockerfile ENTRYPOINT
