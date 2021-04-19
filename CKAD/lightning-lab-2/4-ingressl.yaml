@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-vh-routing
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: watch.ecom-store.com
+    http:
+      paths:
+      - path: /video
+        backend:
+          serviceName: video-service
+          servicePort: 8080
+  - host: apparels.ecom-store.com
+    http:
+      paths:
+      - path: /wear
+        backend:
+          serviceName: apparels-service
+          servicePort: 8080
