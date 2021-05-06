@@ -1,0 +1,32 @@
+# Admin can create CertificateSigningRequest Object and send in
+# to Certificates API to get a new public key signed 
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadata:
+    name: username
+spec:
+    groups:
+    - system:authenticated
+    usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    request:
+      ${output text of "cat username.csr | base64"}
+
+# View certificate signing requests
+kubectl get csr
+
+# approve a csr
+kubectl certificate approve username
+
+# view the signed/approvaed csr
+kubect get csr username -o yaml
+
+# decode the signed certificate and share it with user
+echo "${certificate text}" | base64 --decode
+
+# Controller Manager has CSR-Approving, CSR-Signing components
+cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+--cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt
+--cluster-signing-key-file=/etc/kubernetes/pki/ca.key

@@ -1,0 +1,53 @@
+curl https://kube-master:6443/version
+curl https://kube-master:6443/api/v1/pods
+
+/metrics
+/healthz
+/version
+/api: core api group
+/apis: named groups
+/logs
+
+# core api group
+/api/v1
+- /namespaces
+- /pods
+- /rc
+- /events
+- /endpoints
+- /nodes
+- /bindings
+- /PV
+- /PVC
+- /configmaps
+- /secrets
+- /services
+
+# named api group
+/apis
+- /apps
+  - /v1/deployment (resources)
+    - get (verbs)
+    - create
+    - delete
+    - list
+    - update
+    - watch
+- /extensions
+- /networking.k8s.io
+- /storage.k8s.io
+- /authentication.k8s.io
+- /certificates.k8s.io
+
+# list apis:
+curl http://localhost:6443 -k
+    --key admin.key
+    --cert admin.crt
+    --cacert ca.crt
+
+# Use kubectl proxy use credentials from kube config to 
+# access cluster so that curl commands don't need to pass in
+# credentials
+kubectl proxy (serve at port 8001)
+curl http://localhost:8001 -k
+

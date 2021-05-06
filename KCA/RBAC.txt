@@ -1,0 +1,49 @@
+# developer-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  namespace: finance
+rules:
+- apiGroups: [""] <== this can be blank for core api group
+  resources: ["pod"]
+  verbs: ["list", "get", "create", "update", "delete"]
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["create"]
+
+# Assign user to role
+# devuser-developer-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devuser-developer-binding
+  namespace: finance
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: developer
+  apiGroup: rbac.authorization.k8s.io
+
+# kubectl
+kubectl get roles
+kubectl get rolebinding
+kubectl describe role developer
+kubectl describe rolebinding devuser-developer-binding
+
+# Check access
+kubectl auth can-i create deployments
+kubectl auth can-i delete nodes
+
+# Admin can assume another user
+kubectl auth can-i delete nodes --as dev-user --namespace test
+
+# Resources names in role definintion:
+rules:
+- apiGroups: [""] <== this can be blank for core api group
+  resources: ["pod"]
+  verbs: ["list", "get", "create", "update", "delete"]
+  resourceNames: ["pod-name-1", "pod-name-2"]

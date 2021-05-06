@@ -1,0 +1,16 @@
+### Regarding cluster setup by kubeadm
+## kube-apiserver.yaml
+cat /etc/kubernetes/manifests/kube-apiserver.yaml
+
+## look into a certificate
+openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+
+## View logs
+journalctl -u etcd.service -l
+# or
+kubectl logs etcd-master
+
+# When kube-apiserver and/or etcdserver is down, need to use raw
+# docker to look at the logsm i.e:
+docker ps -a
+docker logs <container_id>

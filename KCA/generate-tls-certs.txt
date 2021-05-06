@@ -1,0 +1,84 @@
+### Generate TLS Certificates
+## openssl
+# Generate private key for Kubernetes CA (internal cluster CA)
+openssl genrsa -out ca.key 2048
+
+# Generate certificate signing request for Kubernetes CA
+openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+
+# Self-sign the certificate => public key for Kubernetes CA
+openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt
+
+# Generate private key, signing request and public key for 
+# admin user using Kubernetes CA certificate and key above
+openssl genrsa -out admin.key 2048
+openssl req -new -key admin.key \
+    -subj "/CN=kube-admin/O=system:masters" -out admin.csr
+openssl x509 -req -in admin.csr -CA ca.crt -CAkey ca.key -out admin.crt
+# "O=system:masters" defines the user group for admin user
+
+# Access kube-apiserver as admin user
+curl https://kube-apiserver:6443/api/v1/pods \
+    --key admin.key --cert admin.crt --cacert ca.crt
+# kube-config.yaml
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: ca.crt
+    server: https://kube-apiserver:6443
+  name: kubernetes
+kind: Config
+users:
+- name: kube-admin
+  user:
+    client-certificate: admin.crt
+    client-key: admin.key
+
+## kube-apiserver certificate needs to have all alternative names
+so that all components can establish connection with it
+# openssl.cnf
+[req]
+req_extensions = v3_req
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepubdiation,
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+IP.1 = 10.96.0.1
+IP.2 = 172.17.0.87
+
+# Generate kube-apiserver key and cert with config above
+openssl genrsa -out apiserver.key 2048
+openssl -req -new -key apiserver.key -subj "/CN=kube-apiserver" \
+    -out apiserver.csr -config openssl.cnf
+openssl x509 -req -in apiserver.csr -CA ca.crt -CAkey ca.key \
+    -out apiserver.cert
+
+## kubelet certificates will be named after its node, 
+i.e: node01.crt. Specify tls config in kubelet-config.yaml
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  x509:
+    clientCAFile: "/var/lib/kubernetes/ca/pem"
+authorization:
+  mode: Webhook
+clusterDomain: "cluster.local"
+clusterDNS:
+- "10.32.0.10"
+podCTDR: "${POD_CTDR}"
+resolvConf: "run/systemctl/resolve/resolv.conf"
+runtimeRequestTimeout: "15m"
+tlsCertFile: "/var/lib/kubelet/kubelet-node01.crt"
+tlsPrivateKeyFile: "/var/lib/kubelet/kubelet-node01.key"
+
+# nodes client certificate will need correct node name format and
+# node group so that kube-apiserver and authenticate/authorize the
+# nodes correctly, i.e:
+openssl req -new -key kubelet-client.key \
+    -subj "/CN=system:node:node01/O=system:nodes" \
+    -out kubelet-client.csr

@@ -1,0 +1,44 @@
+# Recommended approach:
+# Store configuration files on version control systems 
+# such as GitHub
+
+# Backup - Resource Configs
+kubectl get all --all-namespaces -o yaml > all-deploy-services.yaml
+# There are 3rd party tools that help with backup/restore via
+# kube-apiserver
+
+# Backup - ETCD
+# Use 3rd party tool to backup ETCD data directory pre-configured
+# in etcd.service
+--data-dir=/var/lib/etcd
+# Backup using etcdctl
+ETCDCTL_API=3 etcdctl snapshot save /var/lib/backup/snapshot.db
+ETCDCTL_API=3 etcdctl snapshot status /var/lib/backup/snapshot.db
+
+# Restore -ETCD
+service kube-apiserver stop
+ETCDCTL_API=3 etcdctl snapshot restore snapshot.db \
+    --data-dir /var/lib/etcd-from-backup
+# Change config in etcd manifest file in static pod path so etcd
+# can use the new data directory, 
+# i.e: vi etc/kubernetes/manifests/etcd.yaml
+--
+spec:
+  volumes:
+  - name: etcd-data
+    hostPath:
+      type: DirectoryOrCreate
+      path: /var/lib/etcd-from-backup
+
+# If change --data-dir config directly in service etcd.config, 
+# reload and restart etcd service
+systemctl daemon-reload
+service etcd restart
+
+# Speicify etcd cluster endpoint, etcd server cacert, cert and key 
+# for etcdctl commands
+ETCDCTL_API=3 etcdctl snapshot save /var/lib/backup/snapshot.db \
+    --endpoints=https://127.0.0.1:2379 \
+    --cacert=/etc/etcd/ca.crt
+    --cert=/etc/etcd/etcd-server.crt
+    --key=/etc/etcd/etcd-server.key

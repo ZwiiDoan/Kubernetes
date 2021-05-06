@@ -1,0 +1,14 @@
+## Run docker container with additional capabilities
+docker run --user=1001 ubuntu sleep 3600 --cap-ad MAC_ADMIN
+
+## Kubernetes security settings can be configured on pod level
+# or container level (which will override the pod level settings)
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    command: ["sleep","3600"]
+    securityContext: <== This can be moved to pod level (same indent as containers attribute above)
+      runAsUser: 1001
+      capabilities: <== This is only suppored at container level
+        add: ["MAC_ADMIN"]

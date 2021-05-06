@@ -1,0 +1,31 @@
+## Node Authorizer
+# Specify "system:node:" user group in CSR
+
+## ABAC
+# Define user previledge by sendin policy files (json) 
+# to kube-apiserver
+{
+    "kind: "Policy", 
+    "spec": {
+        "user": "dev-user", 
+        "namespace": "*",
+        "resource": "pods",
+        "apiGroup": "*"
+    }, 
+}
+
+## RBAC
+# Create roles with a set of permissions and assign users to roles
+# This is recommended approach
+
+## Webhook
+# Outsource authorization to 3rd party system
+
+## AlwaysAllow
+
+## AlwaysDeny
+
+## kube-apiserver config defines authorization mode, default is
+# AlwaysAllow. Multiple Authorization mode can be used as an
+# Authorization chain
+--authorization-mod=Node,RBAC,Webhook

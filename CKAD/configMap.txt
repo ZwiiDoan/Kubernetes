@@ -23,7 +23,6 @@ kubectl get configmaps
 kubectl describe configmaps
 
 --- in pod-definition.yaml:
-...
 spec:
     containers:
         ...
@@ -31,17 +30,16 @@ spec:
             - configMapRef:
                 name: app-config
 
-
-...
+---
 spec:
     containers:
         ...
         envFrom:
-            - configMapRef:
+            - configMapKeyRef:
                 name: app-config
                 key: APP_COLOR
 
-...
+---
 spec:
     containers:
         ...

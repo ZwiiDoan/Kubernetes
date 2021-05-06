@@ -1,0 +1,22 @@
+## image: nginx 
+# default: nginx = docker.io/nginx/nginx 
+(registry/user account/repository name)
+# Google registry: gcr.io
+
+## Private repository
+docker login ${private-registry.io}
+
+# internal-app-pod.yaml
+spec:
+  containers:
+  - name: internal-app
+    image: private-registry.io/app/internal-app
+  imagePullSecrets:
+  - name: private-registry-credential
+
+# create a secret object to contain credentials for private repo
+kubectl create secret docker-registry private-registry-credential \
+    --docker-server=private-registry.io \
+    --docker-username=registry-user \
+    --docker-password=registry-password \
+    --docker-email=registry-user@org.com

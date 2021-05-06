@@ -1,0 +1,44 @@
+# Using kubectl instead of curl
+curl https://my-kube-playground:6443/api/v1/pods \
+    -- key admin.key
+    -- cert admin.crt
+    -- cacert ca.crt
+
+kubectl get pods \
+    --server my-kube-playground:6443 \
+    --client-key admin.key \
+    --client-certificate admin.crt \
+    --certificate-authority ca.crt \
+
+# Using kubeconfig file to pass in the authentication params
+kubectl get pods --kubeconfig config
+# In config file: $HOME/.kube/config (default path)
+apiVersion: v1
+kind: Config
+curent-context: my-kube-admin@my-kube-playground
+clusters:
+- name: my-kube-playground
+  cluster:
+    certificate-authority: ca.cert
+    server: https://my-kube-playground:6443
+contexts:
+- name: my-kube-admin@my-kube-playground
+  context:
+    cluster: my-kube-playground
+    user: my-kube-admin
+    namespace: my-namespace
+users:
+- name: my-kube-admin
+  user:
+    client-certificate: admin.crt
+    client-key: admin.key
+
+# view current config file content (default is $HOME/.kube/config)
+kubectl config view
+
+# Change context:
+kubectl config use-context prod-user@prod-cluster
+kubectl config -h
+
+# use certificate content instead of path, i.e:
+certificate-authority-data: ${output of "cat ca.cert | base64"}

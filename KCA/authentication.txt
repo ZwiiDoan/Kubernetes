@@ -1,0 +1,83 @@
+### Static password file (Deprecated since k8s v1.19)
+# Given a csv file user-details.csv with 3 columns: 
+# password,username,userId, i.e:
+# password1,username1,userId1
+# In kube-apiserver.service config:
+--basic-auth-file=user-details.csv
+# When access kube-apiserver, provide username and password:
+curl -v -k https://master-node-ip:6443/api/v1/pods \
+    -u "user1:password1"
+
+# user-details.csv can also have a 4th column for user group, i.e:
+# password1,username1,userId1,group1
+
+### Static token file
+# In kube-apiserver.service config:
+--token-auth-file=user-token-details.csv
+# e.g:
+token1,username1,userId1,group1
+# When access kube-apiserver, provide auth header:
+curl -v -k https://master-node-ip:6443/api/v1/pods \
+    --header "Authorization: Bearer token1"
+
+### TLS Basics
+## SSH
+# Key pair = Asymmetric Encryption 
+# (encrypt by one, decrypt by the other)
+# Single key = Symmetric Encryption 
+# (encrypt and decrypt with the same key)
+
+# Generate key pair with command:
+ssh-keygen
+# private key: id_rsa, public key: id_rsa.pub
+
+# Add public key into server authorized keys list:
+# ~/.ssh/authorized_keys
+cat ~/.ssh/authorized_keys
+ssh-rsa <id_rsa.pub content> user1
+
+# Specify private key location when accessing server:
+ssh -i /path/to/id_rsa user1@server1
+
+## SSL/TLS:
+# Server public key is contained inside server certificate.
+# Only Cerificates that are signed by Certificate Authority (CA)
+# can be trusted by browsers/clients.
+# Server generate Cetificate Signing Request (CSR) to send to CA:
+openssl req -new -key my-bank.key -out my-bank.csr \
+    -sub "/C=US/ST=CA/O=MyOrg, Inc./CN=mydomain.com"
+# CA can validate and sign a Certificate then send it back to server
+
+# CAs also have to authenticate themselves with 
+# servers/browsers/clients using key pair. 
+# Certificates are signed by CA private key.
+# All CAs public keys are built-in browsers so they can be used to
+# verify that a certificate was signed by a CA.
+
+# Companies can also host internal CA Server.
+
+# Client/Browser can also request CA to sign their Certificate if
+# required by server (Mutual SSL)
+
+# PKI = Public Key Infrastructure
+# Certificate/Public key normally have *.crt or *.pem extension
+# Private key normally have *.key or *-key.pem extension
+
+### TLS Certificates
+## 3 types of cerficiates:
+# Root Certificates (CA Certificates): ca.crt - ca.key
+# Client Certificates: server.crt/server.pem - server.key/server-key.pem
+# Server Certificates: client.crt/client.pem - client.key/client-key.pem
+
+## Server components:
+# kube-apiserver: apiserver.crt - apiserver.key
+# etcd server: etcdserver.crt - etcdserver.key
+# kubetlet: kubelet.crt - kubelet.key
+
+## Client components:
+# admin user: admin.crt - admin.key
+# scheduler: scheduler.cert - scheduler.key
+# kube-controller-manager: manager.crt - manager.key
+# kube-proxy: proxy.crt - proxy.key
+# kube-apiserver is also the client of kubelets and etcd, it can
+# reuse the same key pair or generate new key pairs.

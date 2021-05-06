@@ -1,0 +1,74 @@
+# Default wait time for a node to recover is 5 minutes
+kube-controller-manager --pod-eviction-timeout=5m0s
+
+# Drain node to move all workloads to other nodes
+kubectl drain node-1
+
+# Allow pods to be scheduled on the node again
+kubectl uncordon node-1
+
+# Mark a node unschedulable
+kubectl cordon node-2
+
+# Kubernetes Software Versions:
+# v1.11.3
+# [major-version].[minor-version].[patch]
+
+# kube-apiserver should have the highest version comparing to
+# other controllers/components in controlplane
+- kube-apiserver: version x
+- controller-amanger: version x (-1)
+- kube-scheduler: verion x (-1)
+- kubelet: version x (-2)
+- kube-proxy: version x (-2)
+
+# kubectl can have higher version than kube-apiserver
+- kubectl: x (+1/-1)
+
+# Kubernetes only support 2 latest order versions
+i.e: v1.12 supports v1.11 and v1.10
+It's recommended to upgrade 1 minor version at a time:
+- v1.10 -> v1.11
+- v1.11 -> v1.12
+Before v1.13 release is a good time to upgrade from v1.10 -> v1.11
+
+# Upgrade with kubeadm
+kubectl upgrade plan
+kubectl upgrade apply
+
+# Upgrade master node first then 
+- upgrade worker node in sequence or
+- add new node with new software version, move workload from old
+node to new node, remove old node => repeat until all nodes
+are upgraded
+
+# Kubeadm cluster upgrade instructions:
+https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
+
+# Identify the OS of the node:
+cat /etc/*release*
+
+# Upgrade master/controlplane node
+apt-get upgrade -y kubeadm=1.12.0-00
+kubeadm upgrade plan
+kubeadm upgrade apply v1.12.0
+kubeadm upgrade plan <== confirm upgrade successfully
+kubectl drain controlplane --ignore-daemonsets
+apt-get upgrade -y kubelet=1.12.0-00
+apt-get upgrade -y kubectl=1.12.0-00
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+kubectl uncordon controlplane
+
+# Upgrade worker nodes
+kubectl drain node-1 --ignore-daemonsets <== kubectl commands has to be run on master node
+apt-get upgrade -y kubeadm=1.12.0-00
+sudo kubeadm upgrade node
+apt-get upgrade -y kubectl=1.12.0-00
+apt-get upgrade -y kubelet=1.12.0-00
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+kubectl uncordon node-1 <== kubectl commands has to be run on master node
+
+# Verify upgrade success
+kubectl get nodes 
