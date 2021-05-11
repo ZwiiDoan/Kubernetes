@@ -8,13 +8,28 @@ spec:
       role: db
   policyTypes:
   - Ingress
+  - Egress
   ingress:
   - from:
     - podSelector:
-        matchLabels: name: api-prod
+        matchLabels: 
+          name: api-pod
+      namespaceSelector:
+        matchLabels:
+          name: prod
     ports:
     - protocol: TCP
       port: 3306
+  - from:
+    - ipBlock:
+        cidr: 192.168.5.10/32 <== external service gets data from db
+    ports:
+    - protocol: TCP
+      port: 3306
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 192.168.5.10/32 <== db sends data to external service
 
 ---
 kubectl create -f policy-definition.yaml
@@ -24,3 +39,4 @@ kubectl create -f policy-definition.yaml
 
 ---
 kubectl get netpol
+

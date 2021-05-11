@@ -14,7 +14,7 @@ kind: StorageClass
 metadata:
   name: google-storage-gold
 provisioner: kubernetes.io/gce-pd
-parameters: # provisioner specific
+parameters:
   type: pd-ssd
   replication-type: none # regional-pd
 
@@ -24,7 +24,7 @@ kind: StorageClass
 metadata:
   name: google-storage-platinum
 provisioner: kubernetes.io/gce-pd
-parameters: # provisioner specific
+parameters:
   type: pd-ssd
   replication-type: regional-pd
 

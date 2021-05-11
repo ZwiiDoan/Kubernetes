@@ -1,0 +1,95 @@
+### Use volume to persist data of pods
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-number-generator
+spec:
+  containers:
+  - image: alpine
+    name: alpine
+    command: ["/bin/sh", "-c"]
+    args: ["shuf -i 0-100 -n 1 >> /opt/number.out;"]
+    volumeMounts:
+    - mounthPath: /opt
+      name: data-volume
+  volumes:
+  - name: data-volume
+#   hostPath: <- Not recommended as it will create the path on every node and assume that all nodes are same
+#     path: /data
+#     type: Directory
+    awsElasticBlockStore:
+      volumeID: <volume-id>
+      fsType: ext4
+
+### Persistent Volumes - volumes that are available cluster-wide
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vol1
+spec:
+  accessModes:
+  - ReadWriteOnce # ReadOnlyMany, ReadWriteMany
+  capacity:
+    storage: 1Gi
+#  hostPath:
+#    path: /tmp/data
+  awsElasticBlockStore:
+    volumeID: <volume-id>
+    fsType: ext4
+---
+kubectl create -f 
+kubectl get persistentvolumes
+
+### Persistent Volume Claims
+# PVC will be binded 1-1 with a PV that satisfies capacity required,
+# access modes, volume modes, storage class and selector. One PVC 
+# has been binded to a PV, no other PVC can select the same PV even
+# if there are free capacity left. PVC that can't find a PV will be 
+# in Pending state to wait for new PVs created in the cluster.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  selector:
+    matchLabels:
+      name: pv-vol1
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+  persistentVolumeReclaimPolicy: Recycle
+
+### Default persistentVolumeReclaimPolicy is Retain (when PVC is
+# deleted, the PV still exists but not available)
+# Other options are Delete and Recycle (data in PV is deleted 
+# and the PV is available again)
+
+### PVC can't be delete if it is being used by a Pod (it will
+# be stuck in Terminating state)
+ 
+---
+kubectl get pvc
+kubectl delete pvc myclaim
+
+# Using PVCs in PODs, ReplicaSets, Deployments
+kind: Pod
+spec:
+  volumes:
+  - name: mypd
+    persistentVolumeClaim:
+      claimName: myClaim
+
+# emptyDir
+An emptyDir volume is first created when a Pod is assigned to a 
+Node, and exists as long as that Pod is running on that node. 
+As the name says, it is initially empty. Containers in the Pod can 
+all read and write the same files in the emptyDir volume, 
+though that volume can be mounted at the same or different paths 
+in each Container. When a Pod is removed from a node for any 
+reason, the data in the emptyDir is deleted forever.
+volumes:
+  - name: data-volume
+    emptyDir: {}

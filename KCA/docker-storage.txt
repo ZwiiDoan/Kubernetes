@@ -1,0 +1,66 @@
+# On host machine: 
+/var/lib/docker
+- aufs
+- containers
+- image
+- volumn
+
+### Docker layered architecture
+Each line in a Dockerfile creates a new layer on top of the
+previous layers so that the layers can be re-used across different
+docker images => faster build and save disk space. Image layer is
+read-only.
+
+# docker run command create a new layer: Container Layer that
+allows read-write access => Same image can be used by multiple 
+containers.
+
+# Container can persist its data into volumes
+docker volumn create data_volume
+# /var/lub/docker/volumes/data_volume is created
+docker run mysql -v data_volume:/var/lib/mysql
+
+# docker can also automatically create volumes (volume mount)
+docker run mysql -v new_data_volume:/var/lib/mysql
+
+# specify complete path to custom volume folder (bind mount)
+docker run mysql -v /data/mysql:/var/lib/mysql
+
+# Recommended command --mount instead of -v
+doccker run mysql --mount type=bind,source=/data/mysql,target=/var/lib/mysql
+
+# Storage drivers enable layered architecture above, Docker will
+choose driver automatically based on the host OS
+- AUFS (Ubuntu)
+- ZFS
+- BTRFS
+- Device Mapper
+- Overlay
+- Overlay2
+
+# Volume drivers plugin helps creating/maintaining volumes
+- Local
+- Azure File Storage
+- Convoy
+- DigitalOcean Block Storage
+- gce-docker
+- Flocker
+- GlusterFS
+- NetApp
+- RextRay
+# volume driver can be selected when running a container, i.e:
+# create and mount a volume in AWS EBS for a MySQL DB
+docker run mysql -it --name mysql --volume-driver rexray/ebs \
+    --mount src=ebs-vol,target=/var/lib/mysql
+
+### Container Storage Interface
+- Container Runtime Interface: Protocol to integrate K8s with 
+different docker runtime engines (rkt, docker, cri-o)
+- Container Network Interface: Protocol to integrate K8s with 
+different Networking solutions (flannel, cilium, weaveworks)
+- Container Storage Interface: Protocol to integrate K8s with 
+different Storage solutions (portworx, dell emc, aws ebs)
+
+# CSI defines a set of RPC that K8s has to invoke to perform
+storage actions against Storage solutions and vice versa. The RPCs
+must be implemented by the Storage solutions
