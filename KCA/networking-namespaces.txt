@@ -1,0 +1,77 @@
+### Container is separated from the host by namespace
+## Create a new network namespace in Linux:
+ip netns add <namespace>
+
+## List the network namespaces:
+ip netns
+
+## List network interfaces inside a namespace:
+it netns exec <namespace> ip link
+# or:
+it -n <namespace> link
+
+## Same for listing ARP (Address Resolution Protocal) or 
+## routing table
+ip netns exec <namespace> arp
+ip netns exec <namespace> route
+
+## Establish connectivity between 2 namespaces red and blue:
+# Create 2 network interfaces veth-red and veth-blue:
+ip link add veth-red type veth peer name veth-blue
+
+# assign the network interfaces to namespace:
+ip link set veth-red netns red
+ip link set veth-blue netns blue
+
+# assign ip addresses to the namespaces:
+ip -n red addr add 192.168.15.1 dev veth-red
+ip -n blue addr add 192.168.15.2 dev veth-blue
+
+# Bring up the network interfaces:
+ip -n red link set veth-red up
+ip -n blue link set veth-blue up
+
+# Now the 2 namespaces are connected:
+ip -n red ping 192.168.15.2
+
+# 2 namespaces can also see each other MAC addresses:
+ip -n red arp
+ip -n blue arp
+
+### Create Virtual Switch in a host to connect more than 2 namespaces:
+# Create a virtual switch v-net-0 using Linux Bridge solution:
+ip link add v-net-0 type bridge
+
+# Bring the virtual switch up:
+ip link set dev v-net-0 up
+
+### Connect namespaces to the virtual switch/bridge network:
+# delete old virtual cable/pipe:
+ip -n red link del veth-red (veth-blue will be deleted automatically)
+
+# create new virtual cables:
+ip link add veth-red type veth peer name veth-red-br
+ip link add veth-blue type veth peer name veth-blue-br
+
+# connect virtual cables to namespace and virtual switch:
+ip link set veth-red netns red
+ip link set veth-red-br master v-net-0
+
+ip link set veth-blue netns blue
+ip link set veth-blue-br master v-net-0
+
+# Assign IP address to namesapces:
+ip -n red addr add 192.168.15.1 dev veth-red
+ip -n blue addr add 192.168.15.2 dev veth-blue
+
+# Bring up the namespaces network interfaces:
+ip -n red link set veth-red up
+ip -n blue link set veth-blue up
+
+### Allow host to access namespaces:
+# Assign an IP address to the virtual switch:
+ip addr add 192.168.15.5/24 dev v-net-0
+
+# Access namespace network:
+ping 192.168.15.1
+

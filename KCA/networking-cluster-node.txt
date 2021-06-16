@@ -1,0 +1,27 @@
+### IP Forwarding
+# On a Linux system the Linux kernel has a variable named 
+# `ip_forward` that keeps this value. It is accessible using 
+# the file `/proc/sys/net/ipv4/ip_forward`. The default value 
+# is 0 which means no IP Forwarding, because a regular user 
+# who runs a single computer without further components is 
+# not in need of that, usually.
+cat /proc/sys/net/ipv4/ip_forward
+
+### Address Resolution Protocol
+# Viewing and modifying the local Address Resolution Protocol 
+# (ARP) cache, which contains recently resolved MAC addresses of 
+# Internet Protocol (IP) hosts on the network
+arp
+
+### The network statistics ( netstat )
+# The network statistics ( netstat ) command is a networking tool 
+# used for troubleshooting and configuration, that can also serve 
+# as a monitoring tool for connections over the network.
+netstat -plnt
+
+https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+https://kubernetes.io/docs/concepts/cluster-administration/networking/#how-to-implement-the-kubernetes-networking-model
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#steps-for-the-first-control-plane-node 
+

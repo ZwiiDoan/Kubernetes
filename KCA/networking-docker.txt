@@ -1,0 +1,40 @@
+### None network
+docker run --network none nginx
+
+### Host network
+docker run --network host nginx
+
+### Bridge network
+docker run nginx
+
+# Internal Docker network is created by default and named "bridge"
+docker network ls
+
+# Docker network is docker0
+ip link
+ip addr
+
+# Each container is created inside a network namespace
+ip netns
+
+# Container network namespace is connected to the docker
+# bridge network by a virtual cable between 2 network interfaces
+ip link
+
+# Docker host - container port mapping uses IP Table under the hood
+iptables -t nat -A PREROUTING -j DNAT --dport 8080 \
+    --to-desitnation 80
+
+iptables -t nat -A DOCKER -j DNAT --dport 8080 \
+    --to-desitnation 172.17.0.3:80
+
+iptables -nvL -t nat
+
+### CNI: Container Network Interfaces that help different container
+run-time integrate with different network solution/plugins if they
+provide appropriate implementations for the interfaces.
+
+### Docker has its own interface CNM - Container Network Model
+# By default, Kubernetes does 2 steps to have Docker work with CNI
+docker run --network=none <pod-name>
+bridge add <network-namespace> /path/to/network-namespace

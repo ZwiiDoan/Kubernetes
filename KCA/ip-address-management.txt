@@ -1,0 +1,17 @@
+### CNI Plugin must manage IP assigments to PODs
+# host-local plugin manage IP locally in a node
+
+### weaveworks default IP range is 10.32.0.0/12
+# 10.32.0.1 - 10.47.255.254
+
+# Show address range managed by weave
+ip addr show weave
+# or
+ifconfig -a
+
+### To check default gateway for pods of a node:
+# Deploy a pod into that node (use nodeName)
+# Go into the pod shell
+kubeclt exec -ti <pod-name> -- sh
+# Check the default gateway:
+ip route

@@ -1,0 +1,68 @@
+### Switching
+- A switch connects multiple devices in a network
+- Each host needs an interface to connect to the switch
+- show network interface eth0:
+ip link
+
+- assign an IP address to each host:
+ip addr add 192.168.1.10/24 dev eth0
+ip addr add 192.168.1.11/24 dev eth0
+
+- then a host can reach another through the switch:
+ping 192.168.1.11
+
+### Routing
+- A Router connects multiple networks
+- Router is assigned an address in each network, e.g:
+192.168.1.1 and 192.168.2.1
+
+### Gateway/Route
+- Gateway is the door of a network to go out to the internet or 
+another network
+- See existing routing config of a network/system:
+ip route
+
+- Add a route for host 1 (192.168.1.10) in network 1 (192.168.1.0) 
+to reach hosts in network 2 (192.168.2.0) via router (192.168.1.1)
+ip route add 192.168.2.0/24 via 192.168.1.1
+
+- Add a default route for hosts in network 2 (192.168.2.0) to reach
+other networks or internet via router (192.168.2.1):
+ip route add default via 192.168.2.1
+- or:
+ip route add 0.0.0.0 via 192.168.2.1 (0.0.0.0 means any destinations)
+| Destination | Gateway     | Genmask       | ... | Iface |
+| 0.0.0.0     | 192.168.1.1 | 255.255.255.0 | ... | eth0  |
+
+- If an entry in route table has 0.0.0.0 as the gateway address, 
+it means there is no gateway required, e.g: access other hosts in 
+the same network
+
+| Destination | Gateway | Genmask       | ... | Iface |
+| 192.168.1.0 | 0.0.0.0 | 255.255.255.0 | ... | eth0  |
+
+- There can be separated gateways for internet and intranet access
+| Destination | Gateway     | Genmask       | ... | Iface |
+| default     | 192.168.1.2 | 255.255.255.0 | ... | eth0  |
+| 192.168.2.0 | 192.168.1.1 | 255.255.255.0 | ... | eth0  |
+
+###  Configure a Linux host as a router
+Network 1: 192.168.1.0
+- Host A: 192.168.1.5
+- Host B: 192.168.1.6 (eth1)
+Network 2: 192.168.2.0
+- Host B: 192.168.2.6
+- Host C: 192.168.2.5 (eth0)
+
+- Configure route in host A to reach host C via host B:
+ip route add 192.168.2.0/24 via 192.168.1.6
+- and vice versa in host C:
+ip route add 192.168.1.0/24 via 192.168.2.6
+
+- Allow host B to forward network traffice between 2 network 
+interfaces (eth0 and eth1):
+echo 1 > /proc/sys/net/ipv4/ip_forward
+- To persist this change permanently:
+vi /etc/sysctl.conf
+- Change:
+net.ipv4.ip_forward = 1

@@ -1,0 +1,19 @@
+### Users are expected to implement their own Networking Model that satisfies below requirements:
+# Every POD should have an IP Address
+# Every POD should be able to communicate to every other POD in the same node
+# Every POD should be able to communicate to every other POD on othernodes without NAT
+
+### net-script.sh
+# Create veth pair
+ip link add ...
+
+# Attach veth pair
+ip link set ...
+ip link set ...
+
+# Assign IP Address
+ip -n <namespace> addr add ...
+ip -n <namespace> route add ...
+
+# Bring Up Interface
+ip -n <namespace> link set ...

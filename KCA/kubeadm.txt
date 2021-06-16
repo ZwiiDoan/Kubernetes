@@ -1,0 +1,9 @@
+### Steps:
+1. Create 2 worker nodes and 1 master node (VMs)
+2. Install container runtime (i.e. docker) on all nodes
+3. Install kubeadm tool on all nodes
+4. Initialise all components on master node
+5. Configure network configuration: POD Network
+6. Join worker nodes to master node
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/

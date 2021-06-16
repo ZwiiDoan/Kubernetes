@@ -1,0 +1,71 @@
+### Hostname
+Network 1: 192.168.1.0
+Host A: 192.168.1.10
+Host B: 192.168.1.11
+
+- Assign a hostname "db" to host B by adding entry to /etc/hosts in host A:
+cat >> /etc/hosts
+192.168.1.11 db
+
+### DNS server 
+- A DNS server manage all hostname entries so that all other host
+can look up instead of using their own /etc/hosts file.
+- Configure a host to use a DNS server (192.168.1.100):
+cat /etc/resolv.conf
+nameserver 192.168.1.100
+- /etc/hosts now can have private host entries.
+- By default entries in /etc/hosts take priority over DNS server,
+this order can be changed in /etc/nsswitch.conf
+
+- configure DNS server to forward all unknown host name to public
+DNS server in the internet (e.g: 8.8.8.8):
+Forward All to 8.8.8.8
+
+### Domain Names:
+Root:               .
+Top Level Domain:   .com
+                    google
+Sub Domain:         mail, www, maps, etc.
+
+- Configure a search domain entry in /etc/resolv.conf so that a 
+hostname can be shorten in commands, e.g:
+cat >> /etc/resolv.conf
+search mycompany.com prod.mycompany.com
+- then:
+ping web => ping web.mycompany.com or web.prod.mycompany.com
+
+### DNS Server record types:
+- A record:     | hostname | ipv4-address |
+- AAAA record:  | hostname | ipv6-address |
+- CNAME record: | hostname | hostname     |
+
+### Tools to test dns name resolution
+- nslookup does not consider /etc/hosts/
+nslookup www.google.com
+- same as dig
+dig www.google.com
+
+
+### CoreDNS
+- CoreNDS is a solution to configure a server as DNS server
+
+### Kubeadm deploy a DNS Server for cluster internal by default. DNS Serve will create DNS entry for each pod/service as:
+|Hostname   |Namespace|Type|Root         |IP Address   |
+|web-service|apps     |svc |cluster.local|10.107.37.188|
+|10-244-2-5 |apps     |pod |cluster.local|10.244.2.5   |
+|10-244-1-5 |default  |pod |cluster.local|10.244.1.5   |
+
+### Access service in another namespace:
+<service-name>.<namespace-name>.svc.cluster.local
+<pod-ip-with-hypens>.<namespace-name>.svc.cluster.local
+
+### Tell pods to look up hostname/ip on a DNS Server with IP 10.96.0.10:
+cat >> /etc/resolv.conf
+nameserver 10.96.0.10
+
+### DNS Server is deployed as pods in kube-system namespace. It runs CoreDNS executable and use plugins configured in /etc/coredns/Corefile. This file is injected into DNS Server pod as a configmap named "coredns".
+kubeclt get configmap -n kube-system
+
+# DNS Server is exposed by a service named "kube-dns" by default.
+
+# IP of DNS Server (clusterDNS) and clusterDomain can be seen in kubelet config: /var/lib/kubelet/config.yaml

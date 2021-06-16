@@ -1,0 +1,20 @@
+### Configuring CNI (Container Network Interface)
+# CNI Plugin is used by Kubelet
+ps -aux | grep kubelet
+--network-plugin=cni
+--cni-bin-dir
+--cni-conf-dir
+--network-plugin
+
+ls /opt/cni/bin
+
+ls /etc/cni/net.d
+
+cat /etc/cni/net.d/10-bridge.conf
+
+### CNI WeaveWorks
+# Weave agents are deployed as daemonset on each node
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+# View Weave pods
+kubectl get pods -n kube-system | grep weave

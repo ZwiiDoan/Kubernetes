@@ -1,0 +1,29 @@
+### Service is host across all nodes in the cluster
+# Service is a virtual object with an assigned IP
+# kube-proxy will setup IP forwarding rules from Service IP address:port to corresponding Pod IP Address
+
+### kube-proxy has 3 modes: (set with --proxy-mode option)
+# userspace
+# iptables (default)
+# ipvs
+
+### Service Types:
+# ClusterIP
+# NodePort
+
+# Service IP range config: (default10.0.0.0/24)
+kube-api-server --service-cluster-api-range ipNet
+
+# Look for IP rules of service in iptables
+iptables -L -t net | grep <service-name>
+# or check log
+cat /var/log/kube-proxy.log
+
+# check IP range of nodes: look at IP address assigned to ens3 interface
+ip addr
+
+# check IP of pods: look for ipalloc-range
+kubectl logs <weave-pod-name> weave -n kube-system
+
+# Check kube-proxy type/mode by looking into logs:
+kubectl logs <kube-proxy-pod-name> -n kube-system

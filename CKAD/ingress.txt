@@ -1,5 +1,5 @@
-# Ingress controller: nginx, haproxy, traefik, GCP LB
-apiVersion: extensions/v1beta1
+### Ingress controller: nginx, haproxy, traefik, GCP LB
+apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: nginx-ingress-controller
@@ -65,7 +65,7 @@ kind: ServiceAccount
 metadata:
     name: nginx-ingress-serviceaccount
 
-# Ingress resources
+### Ingress resources
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -84,16 +84,16 @@ metadata:
     name: ingress-wear-watch
 spec:
     rules:
-        - http:
-            paths:
-                - path: /wear
-                  backend:
-                    serviceName: wear-service
-                    servicePort: 80
-                - path: /watch
-                  backend:
-                    serviceName: watch-service
-                    servicePort: 80
+    - http:
+        paths:
+        - path: /wear
+          backend:
+            serviceName: wear-service
+            servicePort: 80
+        - path: /watch
+          backend:
+            serviceName: watch-service
+            servicePort: 80
 
 ---
 apiVersion: extensions/v1beta1
@@ -102,15 +102,21 @@ metadata:
     name: ingress-wear-watch
 spec:
     rules:
-        - host: wear.my-online-store.com
-          http:
-            paths:
-                - backend:
-                    serviceName: wear-service
-                    servicePort: 80
-        - host: watch.my-online-store.com
-          http:
-            paths:
-                - backend:
-                    serviceName: watch-service
-                    servicePort: 80
+    - host: wear.my-online-store.com
+      http:
+        paths:
+        - backend:
+            serviceName: wear-service
+            servicePort: 80
+    - host: watch.my-online-store.com
+      http:
+        paths:
+        - backend:
+            serviceName: watch-service
+            servicePort: 80
+
+###
+kubectl get ingress
+kubectl describe ingress
+
+### Deploy a default backend service to show nice 404 page for un-supported routes
