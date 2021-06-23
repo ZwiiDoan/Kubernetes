@@ -1,0 +1,45 @@
+### Search for all elements in an array that > 40
+$[?(@>40)]
+
+### Search for all rear-right wheel car models
+$.car.wheels[?(@.localtion == "rear-right")].model
+
+{
+    "car": {
+        "wheels": [
+            {
+                "model": "X345ERT",
+                "localtion": "rear-right"
+            }
+        ]
+    }
+}
+
+https://github.com/json-path/JsonPath
+
+### Wilcard:
+$.car.wheels[*].model
+
+$.*.wheels[*].model
+
+### Get a list from start to exclusive end:
+$[start:end]
+
+$[start:end:skip]
+
+# Get last n items in a list
+$[-n:]
+
+### Use JsonPath with kubectl
+kubectl get nodes -o=jsonpath='{.items[*].metadata.name}{"\n"}{.items[*].status.capacity.cpu}'
+
+### Use loop/range to display data in columns
+kubectl get nodes -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.items[*].status.capacity.cpu}{"\n"}{end}'
+
+### Use custom columns:
+kubectl get nodes -o=custom-columns=<column-name>:<json-path>
+
+kubectl get nods -o=custom-columns=NODE:.metadata.name, CPU: .status.capacity.cpu
+
+### Sort output:
+kubectl get nodes --sort-by=.status.capacity.cpu

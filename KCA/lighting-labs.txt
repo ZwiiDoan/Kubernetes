@@ -1,0 +1,22 @@
+### kubectl drain <node-name> --ignore-daemonsets can only be run from master node
+
+### custom output using jsonpath vs custom-columns and sort-by
+kubectl get nodes -o=jsonpath='{.items[*].metadata.name}{"\n"}{.items[*].status.capacity.cpu'
+kubectl get nods -o=custom-columns=NODE:.metadata.name, CPU: .status.capacity.cpu
+
+### Check client config
+kubectl cluster-info --kubeconfig /root/CKA/admin.kubeconfig
+
+### check static pod path in kubelet config file:
+service kubelet status (then look for the config file path and its content )
+
+### Generate CSR request to Submit user CSR to cluster:
+cat user.crs | base 64 | tr -d "\n"
+
+### Verify user auth:
+kubectl auth can-i update pods --namespace=developement -as=john
+
+### DNS Lookup
+kubectl describe svc (look for service and pod IPs)
+kubectl run test-nslookup --image=busybox:1.28 --rm -it -- nslookup nginx-resolver-service > /root/nginx.svc
+kubectl run test-nslookup --image=busybox:1.28 --rm -it -- nslookup pod-ip-replace-dots-with-hypens.default.pod > /root/nginx.pod
